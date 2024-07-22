@@ -3,16 +3,7 @@ import unittest
 from stack import Stack
 
 class TestStack(unittest.TestCase):
-    def test_simple_push_pop(self):
-        stack = Stack()
-
-        stack.push(3)
-        self.assertEqual(stack.pop(), 3)
-
-        stack.push(5)
-        self.assertEqual(stack.pop(), 5)
-
-    def test_multiple_pushes_and_pops(self):
+    def test_pushing_items_on_top_and_removing_from_the_top(self):
         stack = Stack()
 
         stack.push(1)
@@ -21,14 +12,28 @@ class TestStack(unittest.TestCase):
 
         self.assertEqual(stack.pop(), 3)
         self.assertEqual(stack.pop(), 2)
+
+        stack.push(4)
+        stack.push(5)
+
+        self.assertEqual(stack.pop(), 5)
+        self.assertEqual(stack.pop(), 4)
         self.assertEqual(stack.pop(), 1)
         self.assertEqual(stack.pop(), None)
 
-    def test_popping_empty_stack(self):
+    def test_popping_an_empty_stack(self):
         stack = Stack()
         self.assertEqual(stack.pop(), None)
-        self.assertEqual(stack.pop(), None)
 
+    def test_that_two_stacks_are_not_connected(self):
+        stack1 = Stack()
+        stack2 = Stack()
+
+        stack1.push(1)
+        stack2.push(2)
+
+        self.assertEqual(stack1.pop(), 1)
+        self.assertEqual(stack2.pop(), 2)
 
 if __name__ == '__main__':
     unittest.main()
