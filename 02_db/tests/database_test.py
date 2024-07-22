@@ -2,22 +2,17 @@ import unittest
 import sqlite3
 from pathlib import Path
 
-from snps import categorize_snps
 
-# Add "category" to snps:
-#
-# 1. If snp is normal-specific, category = "Normal"
-# 2. If snp is tumor-specific,  category = "Tumor"
-# 3. If snp is both,            category = "Mixed"
-# 4. If snp is neither,         category = NULL
-#
-class TestCategorizeSnps(unittest.TestCase):
+class DatabaseTest(unittest.TestCase):
     def setUp(self):
         self.db = sqlite3.connect(':memory:')
         schema = Path('schema.sql').read_text()
 
         for statement in schema.split(';'):
             self.db.execute(statement)
+
+    def tearDown(self):
+        self.db.close()
 
     def create_snp(self, snp_id):
         params = {
@@ -56,19 +51,3 @@ class TestCategorizeSnps(unittest.TestCase):
         bindings = (snp_id,)
 
         return self.db.execute(query, bindings).fetchone()[0]
-
-    def test_snps_present_in_normal_samples_are_categorized_correctly(self):
-        self.create_snp('normal1')
-        self.create_snp_call('normal1', sample='TLE66_N')
-
-        category = self.fetch_snp_category('normal1')
-        self.assertEqual(category, None)
-
-        categorize_snps(self.db)
-
-        category = self.fetch_snp_category('normal1')
-        self.assertEqual(category, 'Normal')
-
-
-if __name__ == '__main__':
-    unittest.main()
