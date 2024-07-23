@@ -61,3 +61,15 @@ class TestOverlapGraph(unittest.TestCase):
         graph.find_sequence()
 
         self.assertEqual(graph.sequence, 'ABCDEFG')
+
+    def test_overlap_graph_produces_big_sequence(self):
+        graph = OverlapGraph([
+            'CCTTTGA',
+            'ATTGCA',
+            'GGATATCC',
+            'CATCGG',
+            'TCGGGAT',
+        ])
+        graph.find_sequence()
+
+        self.assertEqual(graph.sequence, 'ATTGCATCGGGATATCCTTTGA')
