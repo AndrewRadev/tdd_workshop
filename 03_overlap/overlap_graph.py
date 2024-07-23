@@ -1,58 +1,60 @@
 import itertools
 
-class OverlapGraph():
-    def __init__(self, reads):
-        self.reads    = reads
-        self.overlaps = {}
 
-        self.sorted_reads = None
-        self.sequence     = None
+def find_sequence(reads):
+    graph = find_read_overlaps(reads)
+    best_path = find_best_path(graph)
 
-        # first -> { second: N, ...}
-        for read in self.reads:
-            self.overlaps[read] = {}
+    return build_sequence_from_path(best_path, graph)
 
-    def find_sequence(self):
-        self.find_read_overlaps()
-        self.sort_reads()
-        self.build_sequence()
 
-    def find_read_overlaps(self):
-        for first in self.reads:
-            for second in self.reads:
-                if first == second: continue
+def find_read_overlaps(reads):
+    # overlap_graph: { first: { second: <weight>, ... }, ... }
+    overlaps = {}
 
-                overlap = find_overlap_between(first, second)
-                if overlap > 0:
-                    self.overlaps[first][second] = overlap
+    for read in reads:
+        overlaps[read] = {}
 
-    def sort_reads(self):
-        max_value = 0
-        best_path = None
+    for first in reads:
+        for second in reads:
+            if first == second: continue
 
-        for path in itertools.permutations(self.reads):
-            value = 0
+            overlap = find_overlap_between(first, second)
+            if overlap > 0:
+                overlaps[first][second] = overlap
 
-            for first, second in itertools.pairwise(path):
-                if second in self.overlaps[first]:
-                    overlap = self.overlaps[first][second]
-                    value += overlap
-                else:
-                    break
+    return overlaps
 
-            if value > max_value:
-                max_value = value
-                best_path = path
+# overlap_graph: { first: { second: <weight>, ... }, ... }
+def find_best_path(overlap_graph):
+    max_value = 0
+    best_path = None
 
-        self.sorted_reads = list(best_path)
+    for path in itertools.permutations(overlap_graph.keys()):
+        value = 0
 
-    def build_sequence(self):
-        for first, second in itertools.pairwise(self.sorted_reads):
-            if self.sequence is None:
-                self.sequence = first
+        for first, second in itertools.pairwise(path):
+            if second in overlap_graph[first]:
+                overlap = overlap_graph[first][second]
+                value += overlap
+            else:
+                break
 
-            overlap = self.overlaps[first][second]
-            self.sequence += second[overlap:]
+        if value > max_value:
+            max_value = value
+            best_path = path
+
+    return list(best_path)
+
+
+def build_sequence_from_path(path, overlap_graph):
+    sequence = path[0]
+
+    for first, second in itertools.pairwise(path):
+        overlap = overlap_graph[first][second]
+        sequence += second[overlap:]
+
+    return sequence
 
 
 def find_overlap_between(first, second):

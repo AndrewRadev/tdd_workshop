@@ -1,6 +1,6 @@
 import unittest
 
-from overlap_graph import OverlapGraph, find_overlap_between
+from overlap_graph import *
 
 class TestOverlapGraph(unittest.TestCase):
     def test_finding_overlap_between_two_sequences(self):
@@ -15,46 +15,36 @@ class TestOverlapGraph(unittest.TestCase):
         self.assertEqual(find_overlap_between('', ''), 0)
 
     def test_finding_overlaps_between_a_group_of_sequences(self):
-        graph = OverlapGraph(['ABCD', 'CDEF'])
-        graph.find_read_overlaps()
+        overlaps = find_read_overlaps(['ABCD', 'CDEF'])
 
-        self.assertEqual(graph.overlaps, {
+        self.assertEqual(overlaps, {
             'ABCD': {'CDEF': 2},
             'CDEF': {},
         })
 
-        graph = OverlapGraph(['ABCDEF', 'EF', 'FGHA'])
-        graph.find_read_overlaps()
+        overlaps = find_read_overlaps(['ABCDEF', 'EF', 'FGHA'])
 
-        self.assertEqual(graph.overlaps, {
+        self.assertEqual(overlaps, {
             'ABCDEF': { 'EF': 2, 'FGHA': 1 },
             'EF': { 'FGHA': 1 },
             'FGHA': { 'ABCDEF': 1 },
         })
 
     def test_overlap_graph_produces_correct_sequence(self):
-        graph = OverlapGraph(['ABCD', 'CDEF'])
-        graph.find_sequence()
-
-        self.assertEqual(graph.sequence, 'ABCDEF')
-
-        graph = OverlapGraph(['CDEFG', 'ABCD', 'EFG'])
-        graph.find_sequence()
-
-        self.assertEqual(graph.sequence, 'ABCDEFG')
+        self.assertEqual(find_sequence(['ABCD', 'CDEF']), 'ABCDEF')
+        self.assertEqual(find_sequence(['CDEFG', 'ABCD', 'EFG']), 'ABCDEFG')
 
     def test_reads_are_sorted_by_graph_weight(self):
-        graph = OverlapGraph([
+        graph = find_read_overlaps([
             'CCTTTGA',
             'ATTGCA',
             'GGATATCC',
             'CATCGG',
             'TCGGGAT',
         ])
-        graph.find_read_overlaps()
-        graph.sort_reads()
+        path = find_best_path(graph)
 
-        self.assertEqual(graph.sorted_reads, [
+        self.assertEqual(path, [
             'ATTGCA',
             'CATCGG',
             'TCGGGAT',
@@ -63,13 +53,12 @@ class TestOverlapGraph(unittest.TestCase):
         ])
 
     def test_overlap_graph_produces_big_sequence(self):
-        graph = OverlapGraph([
+        sequence = find_sequence([
             'CCTTTGA',
             'ATTGCA',
             'GGATATCC',
             'CATCGG',
             'TCGGGAT',
         ])
-        graph.find_sequence()
 
-        self.assertEqual(graph.sequence, 'ATTGCATCGGGATATCCTTTGA')
+        self.assertEqual(sequence, 'ATTGCATCGGGATATCCTTTGA')
