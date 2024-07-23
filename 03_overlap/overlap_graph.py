@@ -1,10 +1,15 @@
+import itertools
+
 class OverlapGraph():
     def __init__(self, reads):
-        self.reads      = reads
+        self.reads = reads
+
         self.children   = {}
         self.has_parent = {}
-        self.root       = None
-        self.sequence   = None
+
+        self.root         = None
+        self.sorted_reads = None
+        self.sequence     = None
 
         # first -> (N, second)
         for read in self.reads:
@@ -13,7 +18,10 @@ class OverlapGraph():
 
     def find_sequence(self):
         self.find_read_overlaps()
-        self.find_root_node()
+
+        # self.find_root_node()
+        self.sort_reads()
+
         self.build_sequence()
 
     def find_read_overlaps(self):
@@ -26,6 +34,31 @@ class OverlapGraph():
                     self.children[first].append((overlap, second))
                     self.has_parent[second] = True
 
+    def sort_reads(self):
+        max_value = 0
+        best_path = None
+
+        for path in itertools.permutations(self.reads):
+            value = 0
+
+            for first, second in itertools.pairwise(path):
+                overlap = next((
+                    overlap
+                    for (overlap, next_node) in self.children[first]
+                    if next_node == second
+                ), None)
+
+                if overlap is None:
+                    break
+                else:
+                    value += overlap
+
+            if value > max_value:
+                max_value = value
+                best_path = path
+
+        self.sorted_reads = list(best_path)
+
     def find_root_node(self):
         for node in self.reads:
             if not self.has_parent[node] and len(self.children[node]) > 0:
@@ -33,13 +66,17 @@ class OverlapGraph():
                 break
 
     def build_sequence(self):
-        current = self.root
-        self.sequence = self.root
+        for first, second in itertools.pairwise(self.sorted_reads):
+            if self.sequence is None:
+                self.sequence = first
 
-        while current in self.children and len(self.children[current]) > 0:
-            (overlap, next_node) = max(self.children[current], key=lambda edge: edge[0])
-            current = next_node
-            self.sequence += next_node[overlap:]
+            overlap = next((
+                overlap
+                for (overlap, next_node) in self.children[first]
+                if next_node == second
+            ), None)
+
+            self.sequence += second[overlap:]
 
 
 def find_overlap_between(first, second):

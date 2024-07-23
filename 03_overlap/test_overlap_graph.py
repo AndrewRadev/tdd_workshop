@@ -57,10 +57,29 @@ class TestOverlapGraph(unittest.TestCase):
 
         self.assertEqual(graph.sequence, 'ABCDEF')
 
-        graph = OverlapGraph(['CDEFG', 'ABCD', 'EFG', 'BC'])
+        graph = OverlapGraph(['CDEFG', 'ABCD', 'EFG'])
         graph.find_sequence()
 
         self.assertEqual(graph.sequence, 'ABCDEFG')
+
+    def test_reads_are_sorted_by_graph_weight(self):
+        graph = OverlapGraph([
+            'CCTTTGA',
+            'ATTGCA',
+            'GGATATCC',
+            'CATCGG',
+            'TCGGGAT',
+        ])
+        graph.find_read_overlaps()
+        graph.sort_reads()
+
+        self.assertEqual(graph.sorted_reads, [
+            'ATTGCA',
+            'CATCGG',
+            'TCGGGAT',
+            'GGATATCC',
+            'CCTTTGA'
+        ])
 
     def test_overlap_graph_produces_big_sequence(self):
         graph = OverlapGraph([
