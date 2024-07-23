@@ -18,38 +18,19 @@ class TestOverlapGraph(unittest.TestCase):
         graph = OverlapGraph(['ABCD', 'CDEF'])
         graph.find_read_overlaps()
 
-        self.assertEqual(graph.children, {
-            'ABCD': [(2, 'CDEF')],
-            'CDEF': []
+        self.assertEqual(graph.overlaps, {
+            'ABCD': {'CDEF': 2},
+            'CDEF': {},
         })
 
         graph = OverlapGraph(['ABCDEF', 'EF', 'FGHA'])
         graph.find_read_overlaps()
 
-        self.assertEqual(graph.children, {
-            'ABCDEF': [(2, 'EF'), (1, 'FGHA')],
-            'EF': [(1, 'FGHA')],
-            'FGHA': [(1, 'ABCDEF')]
+        self.assertEqual(graph.overlaps, {
+            'ABCDEF': { 'EF': 2, 'FGHA': 1 },
+            'EF': { 'FGHA': 1 },
+            'FGHA': { 'ABCDEF': 1 },
         })
-
-    def test_finding_the_root_of_the_overlap_graph(self):
-        graph = OverlapGraph(['ABCD', 'CDEF'])
-        graph.find_read_overlaps()
-        graph.find_root_node()
-
-        self.assertEqual(graph.root, 'ABCD')
-
-        graph = OverlapGraph(['BCD', 'AB', 'CDEF'])
-        graph.find_read_overlaps()
-        graph.find_root_node()
-
-        self.assertEqual(graph.root, 'AB')
-
-        graph = OverlapGraph(['A', 'B', 'BC'])
-        graph.find_read_overlaps()
-        graph.find_root_node()
-
-        self.assertEqual(graph.root, 'B')
 
     def test_overlap_graph_produces_correct_sequence(self):
         graph = OverlapGraph(['ABCD', 'CDEF'])

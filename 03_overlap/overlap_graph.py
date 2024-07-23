@@ -2,26 +2,19 @@ import itertools
 
 class OverlapGraph():
     def __init__(self, reads):
-        self.reads = reads
+        self.reads    = reads
+        self.overlaps = {}
 
-        self.children   = {}
-        self.has_parent = {}
-
-        self.root         = None
         self.sorted_reads = None
         self.sequence     = None
 
-        # first -> (N, second)
+        # first -> { second: N, ...}
         for read in self.reads:
-            self.children[read] = []
-            self.has_parent[read] = False
+            self.overlaps[read] = {}
 
     def find_sequence(self):
         self.find_read_overlaps()
-
-        # self.find_root_node()
         self.sort_reads()
-
         self.build_sequence()
 
     def find_read_overlaps(self):
@@ -31,8 +24,7 @@ class OverlapGraph():
 
                 overlap = find_overlap_between(first, second)
                 if overlap > 0:
-                    self.children[first].append((overlap, second))
-                    self.has_parent[second] = True
+                    self.overlaps[first][second] = overlap
 
     def sort_reads(self):
         max_value = 0
@@ -42,16 +34,11 @@ class OverlapGraph():
             value = 0
 
             for first, second in itertools.pairwise(path):
-                overlap = next((
-                    overlap
-                    for (overlap, next_node) in self.children[first]
-                    if next_node == second
-                ), None)
-
-                if overlap is None:
-                    break
-                else:
+                if second in self.overlaps[first]:
+                    overlap = self.overlaps[first][second]
                     value += overlap
+                else:
+                    break
 
             if value > max_value:
                 max_value = value
@@ -59,23 +46,12 @@ class OverlapGraph():
 
         self.sorted_reads = list(best_path)
 
-    def find_root_node(self):
-        for node in self.reads:
-            if not self.has_parent[node] and len(self.children[node]) > 0:
-                self.root = node
-                break
-
     def build_sequence(self):
         for first, second in itertools.pairwise(self.sorted_reads):
             if self.sequence is None:
                 self.sequence = first
 
-            overlap = next((
-                overlap
-                for (overlap, next_node) in self.children[first]
-                if next_node == second
-            ), None)
-
+            overlap = self.overlaps[first][second]
             self.sequence += second[overlap:]
 
 
