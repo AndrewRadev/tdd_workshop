@@ -1,10 +1,9 @@
-- Nose for running: https://github.com/nose-devs/nose
-- Mocking:          https://docs.python.org/3/library/unittest.mock.html
-
+- Mocking: https://docs.python.org/3/library/unittest.mock.html
 - Pytest: https://docs.pytest.org/en/8.2.x/
   -> Spec output: https://pypi.org/project/pytest-spec/
 
-- Coloured output: https://github.com/meshy/colour-runner
-
 - Expects: https://github.com/jaimegildesagredo/expects
 - BDD:     https://github.com/nestorsalceda/mamba
+
+- Testing requests: https://stackoverflow.com/questions/9559963/unit-testing-a-python-app-that-uses-the-requests-library
+- Database cleaner in ruby: https://github.com/DatabaseCleaner/database_cleaner
